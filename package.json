@@ -1,0 +1,36 @@
+{
+  "name": "mcp-huggingface-tool",
+  "version": "1.0.0",
+  "description": "MCP服务工具，用于调用Hugging Face的模型推理API",
+  "main": "dist/hf_mcp.js",
+  "types": "dist/hf_mcp.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "ts-node src/hf_mcp_example.ts",
+    "prepare": "npm run build",
+    "start:dify": "ts-node src/dify_mcp.ts",
+    "test:dify": "ts-node src/dify_mcp_example.ts"
+  },
+  "keywords": [
+    "mcp",
+    "huggingface",
+    "inference",
+    "ai",
+    "ml"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@huggingface/inference": "^2.6.1",
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.2",
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  }
+}

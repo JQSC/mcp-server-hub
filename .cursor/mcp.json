@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "mcp-hfspace": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@llmindset/mcp-hfspace",
+        "--work-dir=",
+        "--hf-token=",
+        "shuttleai/shuttle-jaguar",
+        "styletts2/styletts2",
+        "Qwen/QVQ-72B-preview"
+      ]
+    }
+  }
+}
