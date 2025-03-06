@@ -1,8 +1,10 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+#!/usr/bin/env node
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-import fs from "fs/promises";
-import path from "path";
+import {
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * @description 模拟资源数据
@@ -83,78 +85,91 @@ async function readLogFile(): Promise<string> {
   return resourceData["logs/app.log"].content;
 }
 
-// 创建 MCP 服务器
-const server = new McpServer(
+const server = new Server(
   {
-    name: "resource-server",
-    version: "1.0.0",
+    name: "resource-mcp",
+    version: "0.1.0",
   },
   {
     capabilities: {
       resources: {},
+      tools: {
+        list: true,
+        call: true,
+      },
     },
   },
 );
 
-// 列出可用资源
-server.tool("list_resources", "列出所有可用的资源", {}, async () => {
-  const resources = Object.entries(resourceData).map(([uri, data]) => ({
-    uri: `file:///${uri}`,
-    name: data.name,
-    mimeType: data.mimeType,
-  }));
-
+// List available resources
+server.setRequestHandler(ListResourcesRequestSchema, async () => {
+  // 可连接数据库，获取资源列表
   return {
-    content: [
+    resources: [
       {
-        type: "text",
-        text: `可用资源列表:\n\n${resources.map((r) => `- ${r.name} (${r.uri})`).join("\n")}`,
+        uri: "file:///logs/app.log",
+        name: "日志数据",
+        mimeType: "text/plain",
+        description: "日志数据",
+      },
+      {
+        uri: "file:///docs/api-reference.md",
+        name: "API 参考文档",
+        mimeType: "text/markdown",
+        description: "组件API 参考文档",
+      },
+      {
+        uri: "file:///docs/getting-started.md",
+        name: "入门指南",
+        mimeType: "text/markdown",
+        description: "组件入门指南",
       },
     ],
   };
 });
 
-// 读取资源内容
-server.tool(
-  "read_resource",
-  "读取指定资源的内容",
-  {
-    uri: z.string().describe("资源的 URI，例如 file:///docs/api-reference.md"),
-  },
-  async ({ uri }: { uri: string }) => {
-    // 从 URI 中提取路径
-    const uriPath = uri.replace("file:///", "");
+// Read resource contents
+server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+  const uri = request.params.uri;
 
-    if (resourceData[uriPath]) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: resourceData[uriPath].content,
-          },
-        ],
-      };
-    }
+  // if (uri === "file:///logs/app.log") {
+  // }
+  const logContents = await readLogFile();
+  return {
+    contents: [
+      {
+        uri,
+        mimeType: "text/plain",
+        text: logContents,
+      },
+    ],
+  };
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: `资源未找到: ${uri}`,
-        },
-      ],
-    };
-  },
-);
+  throw new Error("Resource not found");
+});
 
-// 启动服务器
 async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error("资源服务器已在 stdio 上运行");
+  try {
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+    console.error("Resource MCP server running on stdio");
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
 }
 
+process.on("SIGINT", async () => {
+  console.error("SIGINT received, shutting down...");
+  process.exit(0);
+});
+
+process.on("unhandledRejection", (error) => {
+  console.error("Unhandled promise rejection:", error);
+  process.exit(1);
+});
+
 main().catch((error) => {
-  console.error("服务器启动失败:", error);
+  console.error("Server error:", error);
   process.exit(1);
 });
