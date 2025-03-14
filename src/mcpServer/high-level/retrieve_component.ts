@@ -6,17 +6,39 @@ import dotenv from "dotenv";
 // 加载环境变量
 dotenv.config();
 
+const datasetId = "5065fa82-26d5-4041-932c-0916805d1bc8";
+const apiKey = "dataset-RyJmLg4gcqnC4q6dKuHmskS9"; // process.env.DIFY_API_KEY ;
+const baseUrl = "http://10.30.36.119"; // process.env.DIFY_BASE_URL;
+
 //获取 datasetId，并返回第一个datasetId
 async function getFirstDatasetId() {
-  const response = await fetch(`${process.env.BASE_URL}/v1/datasets`, {
+  const response = await fetch(`${baseUrl}/v1/datasets?page=1&limit=20`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${process.env.API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
   });
   const data = await response.json();
+  // console.log("data", data.data[0]);
   return data.data[0].id;
+}
+
+// 获取文档列表
+async function getDocumentList(datasetId: string) {
+  const response = await fetch(
+    `${baseUrl}/v1/datasets/${datasetId}/documents`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+  const data = await response.json();
+  console.log("data", data.data[0]);
+  return data.data;
 }
 
 /**
@@ -24,17 +46,10 @@ async function getFirstDatasetId() {
  * @param {string} query - 检索查询内容
  * @returns {Promise<Object|null>} 返回API响应数据或null（出错时）
  */
-async function retrieveFromDify(
-  query: string,
-  datasetId: string,
-): Promise<any | null> {
+async function retrieveFromDify(query: string): Promise<any | null> {
   try {
-    // 从环境变量获取数据集ID和API密钥
-    // const datasetId = process.env.DATASET_ID;
-    const apiKey = process.env.API_KEY;
-
     const response = await fetch(
-      `${process.env.BASE_URL}/v1/datasets/${datasetId}/retrieve`,
+      `${baseUrl}/v1/datasets/${datasetId}/retrieve`,
       {
         method: "POST",
         headers: {
@@ -57,6 +72,9 @@ async function retrieveFromDify(
     return null;
   }
 }
+
+// const res = retrieveFromDify("table 组件");
+// console.log("res", res);
 
 /**
  * @description 格式化检索结果
@@ -123,8 +141,8 @@ server.tool(
     query: z.string().describe("要检索的组件查询内容"),
   },
   async ({ query }) => {
-    const firstDatasetId = await getFirstDatasetId();
-    const result = await retrieveFromDify(query, firstDatasetId);
+    // const firstDatasetId = ""; // await getFirstDatasetId();
+    const result = await retrieveFromDify(query);
 
     if (!result) {
       return {

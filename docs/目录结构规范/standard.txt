@@ -1,0 +1,144 @@
+## 项目工程结构规范
+
+### 工程结构原则
+1. **就近原则**：功能相似的放到一起，例如：utils工具函数
+2. **聚合原则**：功能相关的资源放到一起，后续维护方便，不会影响其他
+3. **清晰原则**：每个文件夹命名都要有清晰的含义
+4. **通用原则**：命名的目录尽量使用业界规范、通用的名称，减少认知差别，降低学习成本
+
+### 功能分组模式说明
+基于这种模式就像在 React 应用程序中通过将类似的东西分组来组织代码一样，每个组都包含应用程序中特定工作所需的所有内容，如状态管理、工具方法、自定义hooks、API请求等。将这些组想象成独立的盒子，你可以添加、删除或更改它们，而不会弄乱应用程序的其他部分。这样，你还可以在应用程序的不同部分使用相同的内容，从而节省时间和精力。
+
+在这种模式下，我们可以将功能分开，这样文件夹结构就会非常清晰。
+
+#### 优点
+- **模块化**：添加或更改代码非常简单。由于代码被划分为不同的部分（功能），因此你可以轻松添加新的部分或改进已有的部分。
+- **简化理解**：这种分割能简化代码库，因为有些文件可以被视为私有文件，这有助于你更好地理解代码。
+- **清晰组织**：功能部分之外的代码通常很容易掌握。大部分重要内容都整齐地排列在功能部分，使得理解和使用代码变得更加简单。
+
+#### 缺点
+- **API接口扫描困难**：在做API接口扫描的时候需要深入到各业务功能目录中查找。
+
+### 项目工程结构
+
+```
+├── v6
+│   ├── asset                ## 生产环境打包
+│   ├── asset-dev            ## 开发环境打包
+│   ├── config               ## 主题配置文件
+│   │   ├── theme.config.js
+│   ├── src
+│   │   ├── components       ## 公共业务组件
+│   │   ├── hooks            ## 公共hooks，非跨项目使用的hooks
+│   │   ├── types            ## 全局ts类型
+│   │   ├── static           ## 服务端web项目图片资源
+│   │   │                    ## (由于资源在jsp里引用, 前端代码没有依赖, 不放到static目录的话就不会打包)
+│   │   ├── services         ## 接口调用
+│   │   ├── common           ## 公共资源
+│   │   │   ├── css          ## 公共样式文件
+│   │   │   ├── images       ## 公共图标
+│   │   │   ├── services     ## 服务接口
+│   │   │   ├── context      ## context文件
+│   │   │   ├── constants    ## 全局常量配置
+│   │   │   └── utils        ## 通用工具方法
+│   │   ├── router           ## 路由配置
+│   │   ├── pages            ## 页面组件
+│   │   ├── views            ## 视图组件
+│   ├── babel.config.js      ## 打包配置
+│   ├── .eslintrc.js         ## eslint配置文件
+│   ├── .prettierrc.js       ## prettier配置文件
+│   ├── package-lock.json
+│   ├── package.json    
+│   └── tsconfig.json
+├── .gitignore
+└── README.md                ## 项目信息文档
+
+
+------split------
+
+
+
+# 单组件包工程结构规范
+
+## 概述
+本规范适用于单个独立组件包的开发，提供了标准的目录结构和命名规范，以确保代码组织的一致性和可维护性。
+
+## 单组件包工程结构
+
+```
+[component-package]
+├── 配置文件
+│   ├── .eslintrc.js
+│   ├── .gitignore
+│   ├── .prettierrc.js
+│   ├── babel.config.js
+│   ├── jest.config.js
+│   └── rollup.config.js
+├── 文档文件
+│   ├── CHANGELOG.md
+│   └── README.md
+├── dist                     ## 打包输出目录
+│   ├── es                   ## ES模块
+│   │   ├── index.js
+│   │   └── index.d.ts
+│   ├── lib                  ## CommonJS模块
+│   │   └── index.js
+│   └── umd                  ## UMD模块
+│       └── index.js
+├── demo                     ## 示例代码
+│   ├── BasicUsage.tsx       ## 基础用法示例
+│   └── AdvancedUsage.tsx    ## 高级用法示例
+├── node_modules
+├── package-lock.json
+├── package.json
+├── src                      ## 源代码
+│   ├── services             ## 接口服务
+│   ├── common               ## 公共资源
+│   │   └── js
+│   │       ├── async-throw-error.ts
+│   │       └── axios
+│   │           └── index.ts
+│   ├── components           ## 组件代码
+│   │   ├── [Component]      ## UI组件（大驼峰命名）
+│   │   │   ├── [SubComponent].test.tsx
+│   │   │   ├── [SubComponent].tsx
+│   │   │   ├── __tests__
+│   │   │   │   └── [Component].test.tsx
+│   │   │   ├── index.less
+│   │   │   └── index.tsx
+│   │   └── _utils           ## 工具函数
+│   │       ├── [util].ts
+│   │       └── index.ts
+│   ├── index.less           ## 样式入口
+│   ├── hooks                ## 自定义hooks
+│   ├── index.ts             ## 组件入口
+│   └── types                ## 类型定义
+├── __tests__                ## 测试文件
+│   └── index.test.ts
+├── tsconfig.json            ## TypeScript配置
+└── types                    ## 全局类型定义
+```
+
+## 命名规范
+
+### 文件夹命名规则
+
+#### [Component] 
+- **PascalCase（大驼峰）**：表示当前文件夹为UI组件文件夹
+- **其他情况(非大驼峰)**：表示当前文件夹为js模块文件夹
+
+#### 常见模块命名示例
+- **useXxx**：hook函数（如useSearch，useAjax）
+- **withXxx**：HOC封装函数（如withSearch）
+- **xxxStore**：状态管理store
+  - 只在[Component]组件内使用的store，不需要在src/components单独成文件夹
+  - 多个[Component]公用的store、导出到组件包外的使用store的才在src/components下创建文件夹
+- **其他普通函数**：如searchFindItems，为一般js业务函数
+  - 只在[Component]组件内使用的函数，不需要在src/components单独成文件夹
+  - 多个[Component]公用函数、导出到组件包外的使用的函数才在src/components下创建文件夹
+
+## 最佳实践
+1. 保持组件的单一职责，避免过度复杂的组件设计
+2. 相关的功能和资源应放在一起，便于维护
+3. 公共代码应提取到适当的位置，避免重复
+4. 测试文件应与被测试的组件放在一起或在专门的测试目录中
