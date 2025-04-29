@@ -152,6 +152,9 @@ async function main() {
   try {
     const transport = new StdioServerTransport();
     await server.connect(transport);
+
+    const capabilities = await server.getClientCapabilities();
+    console.log("--> capabilities", capabilities);
     console.error("Resource MCP server running on stdio");
   } catch (error) {
     console.error("Failed to start server:", error);
